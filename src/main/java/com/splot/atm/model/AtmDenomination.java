@@ -13,13 +13,13 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "atm_denominations")
-public class ATMDenomination {
+public class AtmDenomination {
     @Id
     @GeneratedValue
     private Long id;
     @ManyToOne
     @JoinColumn(name = "atm_id")
-    private ATM atm;
+    private Atm atm;
     @ManyToOne
     @JoinColumn(name = "denomination_id")
     private Denomination denomination;

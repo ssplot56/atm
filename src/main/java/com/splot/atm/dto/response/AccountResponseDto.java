@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 public class AccountResponseDto {
     private Long id;
-    private int number;
+    private String number;
     private BigDecimal balance;
 }

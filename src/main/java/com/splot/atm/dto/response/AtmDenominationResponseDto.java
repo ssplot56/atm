@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ATMDenominationResponseDto {
+public class AtmDenominationResponseDto {
     private Long id;
     private Long atmId;
     private Long denominationId;
