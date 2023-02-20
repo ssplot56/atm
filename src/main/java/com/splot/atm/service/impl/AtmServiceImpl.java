@@ -1,62 +1,73 @@
 package com.splot.atm.service.impl;
 
 import com.splot.atm.dto.request.DepositRequestDto;
-import com.splot.atm.model.ATM;
-import com.splot.atm.model.ATMDenomination;
+import com.splot.atm.model.Atm;
+import com.splot.atm.model.AtmDenomination;
 import com.splot.atm.model.Denomination;
-import com.splot.atm.repository.ATMDenominationRepository;
-import com.splot.atm.repository.ATMRepository;
+import com.splot.atm.repository.AtmDenominationRepository;
+import com.splot.atm.repository.AtmRepository;
 import com.splot.atm.repository.DenominationRepository;
-import com.splot.atm.service.ATMService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.splot.atm.service.AtmService;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ATMServiceImpl implements ATMService {
-    private final ATMRepository atmRepository;
+public class AtmServiceImpl implements AtmService {
+    private final AtmRepository atmRepository;
     private final DenominationRepository denominationRepository;
-    private final ATMDenominationRepository atmDenominationRepository;
+    private final AtmDenominationRepository atmDenominationRepository;
 
-    public ATMServiceImpl(ATMRepository atmRepository,
+    public AtmServiceImpl(AtmRepository atmRepository,
                           DenominationRepository denominationRepository,
-                          ATMDenominationRepository atmDenominationRepository) {
+                          AtmDenominationRepository atmDenominationRepository) {
         this.atmRepository = atmRepository;
         this.denominationRepository = denominationRepository;
         this.atmDenominationRepository = atmDenominationRepository;
     }
 
     @Override
-    public ATM findById(Long id) {
-        return atmRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ATM with id: " + id + " not found."));
+    public Atm save(Atm atm) {
+        return atmRepository.save(atm);
     }
 
     @Override
-    public ATM createATM(String name) {
-        ATM atm = new ATM();
+    public Atm findById(Long id) {
+        return atmRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can`t find ATM with id: " + id));
+    }
+
+    @Override
+    public List<Atm> findAll() {
+        return atmRepository.findAll();
+    }
+
+    @Override
+    public Atm createAtm(String name) {
+        Atm atm = new Atm();
         atm.setName(name);
         return atmRepository.save(atm);
     }
 
     @Override
     @Transactional
-    public ATMDenomination addDenomination(Long id, int value, int numberOfNotes) {
+    public AtmDenomination addDenomination(Long id, int value, int numberOfNotes) {
         List<Integer> denominationValues = denominationRepository.findAll()
                 .stream()
                 .map(Denomination::getNominal).collect(Collectors.toList());
         if (!denominationValues.contains(value)) {
-            throw new RuntimeException("Not allowed value: " + value +", use only 100, 200 or 500.");
+            throw new RuntimeException("Not allowed value: "
+                    + value + ", use only 100, 200 or 500.");
         }
 
         Denomination denomination = denominationRepository.findByNominal(value);
-        ATM atm = atmRepository.findById(id)
+        Atm atm = atmRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ATM with id: " + id + " not found."));
-        ATMDenomination atmDenomination = new ATMDenomination();
+        AtmDenomination atmDenomination = new AtmDenomination();
         atmDenomination.setAtm(atm);
         atmDenomination.setDenomination(denomination);
         atmDenomination.setNumberOfNotes(numberOfNotes);
@@ -66,8 +77,9 @@ public class ATMServiceImpl implements ATMService {
 
     @Override
     @Transactional
-    public ATMDenomination updateDenomination(Long atmId, Long atmDenominationId, int numberOfNotes) {
-        ATMDenomination atmDenomination = atmDenominationRepository.findById(atmDenominationId)
+    public AtmDenomination updateDenomination(Long atmId,
+                                              Long atmDenominationId, int numberOfNotes) {
+        AtmDenomination atmDenomination = atmDenominationRepository.findById(atmDenominationId)
                 .orElseThrow(() -> new RuntimeException("ATM denomination not found"));
         atmDenomination.setNumberOfNotes(numberOfNotes);
         return atmDenominationRepository.save(atmDenomination);
@@ -75,9 +87,9 @@ public class ATMServiceImpl implements ATMService {
 
     @Override
     @Transactional
-    public List<ATMDenomination> addDeposit(Long atmId, DepositRequestDto deposit) {
-        List<ATMDenomination> all = atmDenominationRepository.findAllByAtm_Id(atmId);
-        for (ATMDenomination denomination : all) {
+    public List<AtmDenomination> addDeposit(Long atmId, DepositRequestDto deposit) {
+        List<AtmDenomination> all = atmDenominationRepository.findAllByAtm_Id(atmId);
+        for (AtmDenomination denomination : all) {
             if (denomination.getDenomination().getNominal() == 100) {
                 denomination.setNumberOfNotes(denomination.getNumberOfNotes()
                         + deposit.getNumberOfHundredNotes());
@@ -94,16 +106,16 @@ public class ATMServiceImpl implements ATMService {
 
     @Override
     @Transactional
-    public List<ATMDenomination> withdraw(Long atmId, BigDecimal amount) {
-        List<ATMDenomination> all = atmDenominationRepository.findAllByAtm_Id(atmId);
-        Map<Integer, ATMDenomination> denominations = new HashMap<>();
-        for (ATMDenomination denomination : all) {
+    public List<AtmDenomination> withdraw(Long atmId, BigDecimal amount) {
+        List<AtmDenomination> all = atmDenominationRepository.findAllByAtm_Id(atmId);
+        Map<Integer, AtmDenomination> denominations = new HashMap<>();
+        for (AtmDenomination denomination : all) {
             denominations.put(denomination.getDenomination().getNominal(), denomination);
         }
 
         BigDecimal remainingAmount = amount;
         for (int denominationValue : new int[]{500, 200, 100}) {
-            ATMDenomination denomination = denominations.get(denominationValue);
+            AtmDenomination denomination = denominations.get(denominationValue);
             if (denomination != null) {
                 int notesToWithdraw = remainingAmount
                         .divideToIntegralValue(BigDecimal.valueOf(denominationValue)).intValue();

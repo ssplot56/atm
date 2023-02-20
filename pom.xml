@@ -14,7 +14,7 @@
     <name>atm</name>
     <description>atm</description>
     <properties>
-        <java.version>11</java.version>
+        <jdk.version>11</jdk.version>
     </properties>
     <dependencies>
         <dependency>
