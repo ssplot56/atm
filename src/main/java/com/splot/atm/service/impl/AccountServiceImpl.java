@@ -1,6 +1,7 @@
 package com.splot.atm.service.impl;
 
 import com.splot.atm.dto.request.DepositRequestDto;
+import com.splot.atm.dto.request.WithdrawRequestDto;
 import com.splot.atm.model.Account;
 import com.splot.atm.repository.AccountRepository;
 import com.splot.atm.service.ATMService;
@@ -37,9 +38,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Account deposit(Long atmId, Long accountId, DepositRequestDto requestDto) {
+    public Account deposit(Long atmId, DepositRequestDto requestDto) {
         atmService.findById(atmId);
-        Account account = findById(accountId);
+        Account account = findById(requestDto.getAccountId());
         BigDecimal amount = ONE_HUNDRED
                 .multiply(BigDecimal.valueOf(requestDto.getNumberOfHundredNotes()))
                 .add(TWO_HUNDRED.multiply(BigDecimal.valueOf(requestDto.getNumberOfTwoHundredNotes())))
@@ -51,17 +52,17 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Account withdraw(Long atmId, Long accountId, BigDecimal amount) {
-        if (cantBeObtained(amount)) {
+    public Account withdraw(Long atmId, WithdrawRequestDto requestDto) {
+        if (cantBeObtained(requestDto.getAmount())) {
             throw new RuntimeException("ATM dispenses bills in denominations of 100, 200, 500 only");
         }
-        Account account = findById(accountId);
+        Account account = findById(requestDto.getAccountId());
         atmService.findById(atmId);
-        BigDecimal newBalance = account.getBalance().subtract(amount);
+        BigDecimal newBalance = account.getBalance().subtract(requestDto.getAmount());
         if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Insufficient balance");
         }
-        atmService.withdraw(atmId, amount);
+        atmService.withdraw(atmId, requestDto.getAmount());
         account.setBalance(newBalance);
         return accountRepository.save(account);
     }

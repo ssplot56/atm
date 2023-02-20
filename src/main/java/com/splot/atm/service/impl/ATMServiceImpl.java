@@ -120,22 +120,7 @@ public class ATMServiceImpl implements ATMService {
             throw new RuntimeException("Not enough money in ATM");
         }
 
-        List<ATMDenomination> updatedDenominations
-                = atmDenominationRepository.saveAll(denominations.values());
-        // Check if the withdrawal was successful before returning the updated denominations
-        if (amount.compareTo(getWithdrawnAmount(updatedDenominations)) != 0) {
-            throw new RuntimeException("Withdrawal failed. Database updated with incorrect information.");
-        }
-        return updatedDenominations;
+        return atmDenominationRepository.saveAll(denominations.values());
     }
 
-    private BigDecimal getWithdrawnAmount(List<ATMDenomination> denominations) {
-        BigDecimal amount = BigDecimal.ZERO;
-        for (ATMDenomination denomination : denominations) {
-            amount = amount.add(BigDecimal
-                    .valueOf((long) denomination.getNumberOfNotes()
-                            * denomination.getDenomination().getNominal()));
-        }
-        return amount;
-    }
 }
