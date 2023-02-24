@@ -36,13 +36,13 @@ if the specified amount is not available on your account.
 * __Repository__ - provides all database operations;
 
 ### Technology Stack:
-* Java 11
+* Java 11;
 * Apache Maven;
-* Spring Boot
-* Spring JPA
+* Spring Boot;
+* Spring JPA;
 * Spring Security
 * Hibernate, Jpa;
-* H2 database
+* H2 database.
 
 ### How to launch:
 1. Clone the repository to your local machine.
